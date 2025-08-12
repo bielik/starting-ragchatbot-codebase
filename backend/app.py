@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 import os
 
 from config import config
@@ -43,7 +43,7 @@ class QueryRequest(BaseModel):
 class QueryResponse(BaseModel):
     """Response model for course queries"""
     answer: str
-    sources: List[str]
+    sources: List[Dict[str, Any]]  # Changed to support sources with links
     session_id: str
 
 class CourseStats(BaseModel):
@@ -82,6 +82,18 @@ async def get_course_stats():
             total_courses=analytics["total_courses"],
             course_titles=analytics["course_titles"]
         )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/session/clear")
+async def clear_session(session_id: Optional[str] = None):
+    """Clear a session's conversation history"""
+    try:
+        if session_id:
+            rag_system.session_manager.clear_session(session_id)
+        # Always create and return a new session
+        new_session_id = rag_system.session_manager.create_session()
+        return {"session_id": new_session_id, "status": "success"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
