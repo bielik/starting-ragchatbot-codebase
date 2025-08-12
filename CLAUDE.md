@@ -56,10 +56,11 @@ This is a **RAG (Retrieval-Augmented Generation) System** with a three-layer arc
 - Session management for conversation history
 
 **Tool-Based Search Architecture** - The system uses a tool-based approach where:
-- `ToolManager` registers available search tools
-- `CourseSearchTool` performs vector searches
+- `ToolManager` registers and manages available tools
+- `CourseSearchTool` performs content searches within course materials
+- `CourseOutlineTool` retrieves complete course structures with lesson lists
 - Claude API calls tools dynamically during response generation
-- Tools return sources that are tracked and returned to frontend
+- Tools return sources that are tracked and returned to frontend with links
 
 **Data Models** (`models.py`):
 - `Course`: Contains title, instructor, lessons list
