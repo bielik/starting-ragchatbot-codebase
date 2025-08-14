@@ -1,0 +1,56 @@
+name: Claude Mentions Handler
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  issues:
+    types: [opened]
+  pull_request:
+    types: [opened]
+
+jobs:
+  claude-mention:
+    # Only run if the comment mentions @claude
+    if: |
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'issues' && contains(github.event.issue.body, '@claude')) ||
+      (github.event_name == 'pull_request' && contains(github.event.pull_request.body, '@claude'))
+    
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Respond to Claude mention
+        id: claude-response
+        uses: anthropics/claude-code-action@beta
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          
+          # Optional: Specify model (defaults to Claude Sonnet 4, uncomment for Claude Opus 4.1)
+          # model: "claude-opus-4-1-20250805"
+          
+          # Enable interactive mode for mentions
+          mention_mode: true
+          
+          # Optional: Allow Claude to use specific tools when responding
+          # allowed_tools: "Read,Grep,Bash(ls),Bash(cat)"
+          
+          # Optional: Custom system prompt for mentions
+          system_prompt: |
+            You are Claude, an AI assistant helping with code and technical questions.
+            When mentioned with @claude, respond helpfully to the user's question or request.
+            Be concise but thorough in your responses.
+            If asked to review code, provide constructive feedback.
+            If asked technical questions, provide clear explanations with examples when helpful.
