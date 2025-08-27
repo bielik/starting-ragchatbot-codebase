@@ -260,7 +260,23 @@ function initializeTheme() {
 
 function toggleTheme() {
     const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    let newTheme;
+    
+    // Cycle through: dark → light → pink → dark
+    switch (currentTheme) {
+        case 'dark':
+            newTheme = 'light';
+            break;
+        case 'light':
+            newTheme = 'pink';
+            break;
+        case 'pink':
+            newTheme = 'dark';
+            break;
+        default:
+            newTheme = 'dark';
+    }
+    
     setTheme(newTheme);
 }
 
@@ -268,17 +284,27 @@ function setTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
     
-    // Update toggle button icon
+    // Update toggle button icon and title
     const sunIcon = themeToggle.querySelector('.sun-icon');
     const moonIcon = themeToggle.querySelector('.moon-icon');
     
-    if (theme === 'light') {
-        sunIcon.style.display = 'none';
-        moonIcon.style.display = 'block';
-        themeToggle.title = 'Switch to dark theme';
-    } else {
-        sunIcon.style.display = 'block';
-        moonIcon.style.display = 'none';
-        themeToggle.title = 'Switch to light theme';
+    switch (theme) {
+        case 'light':
+            sunIcon.style.display = 'none';
+            moonIcon.style.display = 'block';
+            themeToggle.title = 'Switch to pink theme';
+            break;
+        case 'pink':
+            sunIcon.style.display = 'block';
+            moonIcon.style.display = 'none';
+            themeToggle.title = 'Switch to dark theme';
+            // Add pink styling to the icon
+            themeToggle.style.color = '#e91e63';
+            break;
+        default: // dark
+            sunIcon.style.display = 'block';
+            moonIcon.style.display = 'none';
+            themeToggle.title = 'Switch to light theme';
+            themeToggle.style.color = '';
     }
 }
